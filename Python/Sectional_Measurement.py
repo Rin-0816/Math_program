@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Yu Mincho'  # or any font that supports Japanese characters
 import tkinter as tk
-from tkinter import ttk
 
 # グローバル変数nを定義
 n = 10
@@ -33,7 +32,7 @@ def main():
     fig.canvas.manager.set_window_title("x^2のグラフと"+str(n)+"分割したときの区分求積したときのイメージ")
     ax.set_title("x^2のグラフと"+str(n)+"分割したときの区分求積したときのイメージ")
     plt.show(block=True)
-
+    
 def plot_graph(x, y, ax):
     ax.plot(x, y, label="y=x^2",color="red")
     ax.set_xlim(0, 1)
@@ -88,19 +87,19 @@ def update_value():
     N = tk.StringVar(value='1')
     N.trace("w", check_entry)  # Nの値が変更されたときにcheck_entryを呼び出す
 
-    entry = ttk.Entry(root, textvariable=N)
+    entry = tk.Entry(root, textvariable=N)
     entry.grid(row=0, column=0, padx=10, pady=10)  # gridを使用し、パディングを追加
 
-    scale = ttk.Scale(root, from_=1, to=500, orient='horizontal', command=update_scale,variable=N)
+    scale = tk.Scale(root, from_=1, to=500, orient='horizontal', command=update_scale,variable=N)
     scale.grid(row=1, column=0, padx=10, pady=10)  # gridを使用し、パディングを追加
 
-    label = ttk.Label(root, textvariable=N)
+    label = tk.Label(root, textvariable=N)
     label.grid(row=2, column=0, padx=10, pady=10)  # gridを使用し、パディングを追加
 
-    ok_button = ttk.Button(root, text="OK", command=ok_clicked)
+    ok_button = tk.Button(root, text="OK", command=ok_clicked)
     ok_button.grid(row=3, column=0, padx=10, pady=10)  # gridを使用し、パディングを追加
 
-    cancel_button = ttk.Button(root, text="Cancel", command=cancel_clicked)
+    cancel_button = tk.Button(root, text="Cancel", command=cancel_clicked)
     cancel_button.grid(row=4, column=0, padx=10, pady=10)  # gridを使用し、パディングを追加
 
     update_entry("1.0")

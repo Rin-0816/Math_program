@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>麻の葉パターンの描画</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Snap.svgの初期化
+      const s = Snap("#Pattern");
+      const sqrt3 = Math.sqrt(3);
+      const lw = 50;          // 葉の幅
+      const lh = 25 * sqrt3;  // 葉の高さ
+
+      // 麻の葉を描画する関数（線のみ）
+      const drawLeaf = function(x, y) {
+        // 線を描画
+        const lines = [
+          s.line(x, y, x + lw, y).attr({stroke: 'black', strokeWidth: lw * 0.04}),
+          s.line(x + lw, y, x + lw / 2, y + lh).attr({stroke: 'black', strokeWidth: lw * 0.04}),
+          s.line(x + lw / 2, y + lh, x, y).attr({stroke: 'black', strokeWidth: lw * 0.04})
+        ];
+        s.group(...lines);
+      }
+
+      // 領域の認識を改良
+      // 各線の端点を取得して、全ての交点を探索します。閉じた領域を判定し、それらをオブジェクトとして保持する
+      const detectRegions = function(lines) {
+        const points = new Map();
+        lines.forEach(line => {
+          const x1 = parseFloat(line.attr('x1'));
+          const y1 = parseFloat(line.attr('y1'));
+          const x2 = parseFloat(line.attr('x2'));
+          const y2 = parseFloat(line.attr('y2'));
+          const key1 = `${x1},${y1}`;
+          const key2 = `${x2},${y2}`;
+          if (!points.has(key1)) points.set(key1, { x: x1, y: y1, connections: [] });
+          if (!points.has(key2)) points.set(key2, { x: x2, y: y2, connections: [] });
+          points.get(key1).connections.push(points.get(key2));
+          points.get(key2).connections.push(points.get(key1));
+        });
+
+        // 領域の検出（閉じたパスを探索する）
+        const visited = new Set();
+        const regions = [];
+
+        const findRegion = (startPoint) => {
+          const stack = [startPoint];
+          const region = [];
+          while (stack.length > 0) {
+            const point = stack.pop();
+            const key = `${point.x},${point.y}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              region.push(point);
+              point.connections.forEach(conn => {
+                const connKey = `${conn.x},${conn.y}`;
+                if (!visited.has(connKey)) {
+                  stack.push(conn);
+                }
+              });
+            }
+          }
+          return region;
+        };
+
+        points.forEach(point => {
+          const key = `${point.x},${point.y}`;
+          if (!visited.has(key)) {
+            const region = findRegion(point);
+            if (region.length > 2) { // 閉じた領域として扱う
+              regions.push(region);
+            }
+          }
+        });
+
+        return regions;
+      };
+
+      // 葉を描画する
+      let x0 = 0;
+      const width = 640;
+      const height = 400;
+      const allLines = [];
+      for (let y = 0; y <= height; y += lh) {
+        for (let x = x0; x <= width; x += lw) {
+          const lines = [
+            s.line(x, y, x + lw, y).attr({stroke: 'black', strokeWidth: lw * 0.04}),
+            s.line(x + lw, y, x + lw / 2, y + lh).attr({stroke: 'black', strokeWidth: lw * 0.04}),
+            s.line(x + lw / 2, y + lh, x, y).attr({stroke: 'black', strokeWidth: lw * 0.04})
+          ];
+          allLines.push(...lines);
+          s.group(...lines);
+        }
+        x0 = (x0 === 0) ? -lw / 2 : 0;
+      }
+
+      // 領域の検出を試みる
+      const regions = detectRegions(allLines);
+      console.log(regions); // 検出された領域をコンソールに出力
+    });
+  </script>
+</head>
+<body>
+  <h1>麻の葉パターンの描画</h1>
+  <svg id="Pattern" xmlns="http://www.w3.org/2000/svg" width="640" height="400" style="border: 1px solid black;"></svg>
+</body>
+</html>
